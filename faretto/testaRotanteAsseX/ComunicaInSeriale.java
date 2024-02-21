@@ -32,6 +32,8 @@ public class ComunicaInSeriale extends Application {
 	Label etichettaFeedbackReg = new Label();
 	Label etichettaFeedbackSettings = new Label();
 	
+	int vettoreModelli[][]= {{5, 45}, {5, 90}, {5, 180}, {5, 360}};
+	
 	byte[] messageToSend= new byte[4];
 
 	Scene scena;
@@ -89,7 +91,7 @@ public class ComunicaInSeriale extends Application {
 		grigliaComandiManuali.add(bStop, 1, 3);
 		grigliaComandiManuali.add(bAggiorna, 2, 3);
 		grigliaComandiManuali.add(eFeedback, 0, 4);
-		grigliaComandiManuali.add(etichettaFeedback, 1, 4);
+		grigliaComandiManuali.add(etichettaFeedback, 1, 4, 2, 1);
 
 		grigliaComandiManuali.setPadding(new Insets(10, 10, 10, 10));
 		grigliaComandiManuali.setHgap(10);
@@ -123,7 +125,7 @@ public class ComunicaInSeriale extends Application {
 		grigliaComandiRegistrati.add(bStopReg, 1, 3);
 		grigliaComandiRegistrati.add(bAggiornaReg, 2, 3);
 		grigliaComandiRegistrati.add(eFeedbackReg, 0, 4);
-		grigliaComandiRegistrati.add(etichettaFeedbackReg, 1, 4);
+		grigliaComandiRegistrati.add(etichettaFeedbackReg, 1, 4, 2, 1);
 
 		grigliaComandiRegistrati.setPadding(new Insets(10, 10, 10, 10));
 		grigliaComandiRegistrati.setHgap(10);
@@ -156,7 +158,7 @@ public class ComunicaInSeriale extends Application {
 		grigliaImpostazioni.add(bCambiaPortaCOM, 0, 2);
 		grigliaImpostazioni.add(bCercaPorteCOM, 2, 2, 2, 1);
 		grigliaImpostazioni.add(eFeedbackSet, 0, 3);
-		grigliaImpostazioni.add(etichettaFeedbackSettings, 1, 3,2,1);
+		grigliaImpostazioni.add(etichettaFeedbackSettings, 1, 3, 2, 1);
 		
 		grigliaImpostazioni.setPadding(new Insets(10, 10, 10, 10));
 		grigliaImpostazioni.setHgap(10);
@@ -167,12 +169,12 @@ public class ComunicaInSeriale extends Application {
 		pannello.getTabs().add(impostazioni);
 
 		//affidiamo ad ogni pulsante un metodo
-		bStart.setOnAction(e -> startMovment());
-		bStartReg.setOnAction(e -> startMovment());
-		bStop.setOnAction(e -> stopMovment());
-		bStopReg.setOnAction(e -> stopMovment());
+		bStart.setOnAction(e -> startMovment(false));
+		bStartReg.setOnAction(e -> startMovment(true));
+		bStop.setOnAction(e -> stopMovment(false));
+		bStopReg.setOnAction(e -> stopMovment(true));
 		bAggiorna.setOnAction(e -> aggiornaDati());
-		bAggiornaReg.setOnAction(e -> aggiornaDati());
+		bAggiornaReg.setOnAction(e -> aggiornaDatiReg());
 		bCambiaPortaCOM.setOnAction(e -> cambiaCOM());
 		bCercaPorteCOM.setOnAction(e -> cercaPorteCOM());
 
@@ -204,22 +206,73 @@ public class ComunicaInSeriale extends Application {
 		}
 	}
 	
-	public void startMovment() {
+	public void startMovment(boolean registrato) {
 		System.out.println("start");
 		messageToSend[3]=1; //inizia movimento
-		aggiornaDati();
+		if(registrato) {
+			aggiornaDatiReg();
+		}else {
+			aggiornaDati();
+		}
+		
 	}
 
-	public void stopMovment() {
+	public void stopMovment(boolean registrato) {
 		System.out.println("stop");
 		messageToSend[3]=0; //ferma movimento
-		aggiornaDati();
+		if(registrato) {
+			aggiornaDatiReg();
+		}else {
+			aggiornaDati();
+		}
 	}
-
+	public void aggiornaDatiReg() {
+		byte velocita = 0;
+		int gradiRotazione = 0;
+		switch(modelli.getValue()){
+			case "modello1":
+				velocita=(byte)vettoreModelli[0][0];
+				gradiRotazione=vettoreModelli[0][1];
+				break;
+			case "modello2":
+				velocita=(byte)vettoreModelli[1][0];
+				gradiRotazione=vettoreModelli[1][1];
+				break;
+			case "modello3":
+				velocita=(byte)vettoreModelli[2][0];
+				gradiRotazione=vettoreModelli[2][1];
+				break;
+			case "modello4":
+				velocita=(byte)vettoreModelli[3][0];
+				gradiRotazione=vettoreModelli[3][1];
+				break;
+		}
+		
+		System.out.println(velocita+" "+gradiRotazione);
+		
+		modificaVettore(velocita, gradiRotazione);//prepariamo il vettore per la trasmissione
+		//invia il vettore
+		if(!invia()) { 
+			etichettaFeedbackReg.setText("!!! errore nell'invio dei dati");
+		}else {
+			etichettaFeedbackReg.setText("dati inviati con successo");
+		}
+	}
 	public void aggiornaDati() {
 		int gradiRotazione = (int) (sGradiDiRotazione.getValue());
 		byte velocita=(byte) (sVelocità.getValue());
 		
+		modificaVettore(velocita, gradiRotazione);//prepariamo il vettore per la trasmissione
+		
+		//invia il vettore
+		if(!invia()) { 
+			etichettaFeedback.setText("!!! errore nell'invio dei dati");
+		}else {
+			etichettaFeedback.setText("dati inviati con successo");
+		}
+	}
+	
+	public void modificaVettore(byte velocita, int gradiRotazione) {
 		messageToSend[2]=velocita;
 		if(gradiRotazione>127) {
 			//dobbiamo trasformare l'intero in byte senza perdere dati
@@ -232,31 +285,39 @@ public class ComunicaInSeriale extends Application {
 			messageToSend[0]=(byte) (gradiRotazione);
 			messageToSend[1]=0;
 		}
-		invia();
 	}
 	
-	public void invia() {
-		portaSeriale.writeBytes(messageToSend, 4);
-
-		byte[] acknowledgment= new byte[4];
-		long tempo1=System.currentTimeMillis();
-		long tempo2;
-		boolean continua=true;
-		while(portaSeriale.readBytes(acknowledgment, 4)!=4 && continua) {
-			//ti fermi qui fino a quando non hai ricevuto i caratteri dovuti
-			tempo2=System.currentTimeMillis();
-			if(tempo1-tempo2>100) {
-				continua=false;
+	public boolean invia() {
+		boolean stato;
+		if(portaPresente) {
+			portaSeriale.writeBytes(messageToSend, 4);
+			byte[] acknowledgment= new byte[4];
+			long tempo1=System.currentTimeMillis();
+			long tempo2;
+			boolean continua=true;
+			while(portaSeriale.readBytes(acknowledgment, 4)!=4 && continua) {
+				//ti fermi qui fino a quando non hai ricevuto i caratteri dovuti
+				tempo2=System.currentTimeMillis();
+				if(tempo1-tempo2>100) {
+					continua=false;
+				}
 			}
+			for(int i=0; i<acknowledgment.length; i++) {
+				System.out.println(acknowledgment[i]); //se è 1 è stato ricevuto
+			}
+			stato=true;
+		}else {
+			stato=false;
 		}
-		for(int i=0; i<acknowledgment.length; i++) {
-			System.out.println(acknowledgment[i]); //se è 1 è stato ricevuto
-		}
+		return stato;
+
+		
 	}
 	
 	public void cercaPorteCOM() {
 		if(portaPresente) {
 			portaSeriale.closePort();
+			portaPresente=false;
 		}
 		porteCOM.getItems().clear();
 		nomePortaCOM = SerialPort.getCommPorts();
@@ -279,7 +340,7 @@ public class ComunicaInSeriale extends Application {
 					etichettaFeedbackSettings.setText("impossibile aprire la porta");
 				}
 				portaSeriale = nomePortaCOM[i];
-				i = nomePortaCOM.length - 1;
+				i = nomePortaCOM.length - 1; //fermiamo il ciclo
 			}
 		}
 	}
