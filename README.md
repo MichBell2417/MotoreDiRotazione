@@ -1,5 +1,6 @@
 # meccanismo-Di-Rotazione
 Repository con codici riguardanti la creazioni di un sistema che attraverso un computer al quale c'è collegato un'antenna, riesce a comunicare attraverso un'interfaccia grafica apposita con un dispositivo che attraverso un motore stepper, muove un faretto sull'asse orizzontale.
+\NL
 CARATTERISTICHE:
 -antenna: l'antenna è un semplice arduino nano munito di un'trasmettitore RF24 che attraverso un codice ("TrasmettitoreTestaRotanteRF24") recepisce i valori dalla Seriale li inserisce in un vettore e li invia al "motore".
 -motore: il motore è un'altro dispositivo, ha il compito di ricevere i messaggi decodificarli capendo i comandi da eseguire ed eseguire i comandi ricevuti come la velocità di rotazione, i gradi di rotazione e quando girare o non.
