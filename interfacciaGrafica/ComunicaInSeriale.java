@@ -4,8 +4,6 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -28,13 +26,29 @@ public class ComunicaInSeriale extends Application {
 	SerialPort portaSeriale; // porta in uso
 	boolean portaPresente=false;
 
+	boolean inMovimento=false;
+	
 	Label etichettaFeedback = new Label();
 	Label etichettaFeedbackReg = new Label();
 	Label etichettaFeedbackSettings = new Label();
 	
+	//bottoni pagina personalizza
+	Button bStart = new Button("Start");
+	Button bStop = new Button("Stop");
+	Button bAggiorna = new Button("Invia nuovi dati");
+	
+	//bottoni pagina modelli
+	Button bStartReg = new Button("Start");
+	Button bStopReg = new Button("Stop");
+	Button bAggiornaReg = new Button("Invia modello");
+
+	//label impostazioni
+	Label statoAntennaSet= new Label("STATO ANTENNA");
+	
 	int vettoreModelli[][]= {{5, 45}, {5, 90}, {5, 180}, {5, 360}};
 	
 	byte[] messageToSend= new byte[4];
+	byte[] startMessage= {48+5}; //deve essere '5'
 
 	Scene scena;
 	
@@ -67,14 +81,11 @@ public class ComunicaInSeriale extends Application {
 		Tab impostazioni = new Tab("Impostazioni");
 
 		// comandi personalizzati
+		
 		Label eTitle = new Label("Manual ControlLight");
 		Label eGradiRotazione = new Label("Rotazione in °");
 		Label eVelocitàDiRotazione = new Label("Velocità");
 		Label eFeedback = new Label("Feedback: ");
-
-		Button bStart = new Button("Start");
-		Button bStop = new Button("Stop");
-		Button bAggiorna = new Button("Invia nuovi dati");
 
 		eTitle.getStyleClass().add("titolo");
 		bAggiorna.getStyleClass().add("buttonAggiorna");
@@ -102,15 +113,12 @@ public class ComunicaInSeriale extends Application {
 		pannello.getTabs().add(comandiManuali);
 
 		// Comandi registrati
+		
 		Label eTitleReg = new Label("Registered ControlLight");
 		Label eFeedbackReg = new Label("Feedback: ");
 		Label eRegistratiReg = new Label("Pogrammi registrati");
 
 		creaCombobox();
-
-		Button bStartReg = new Button("Start");
-		Button bStopReg = new Button("Stop");
-		Button bAggiornaReg = new Button("Invia modello");
 
 		eTitleReg.getStyleClass().add("titolo");
 		bAggiornaReg.getStyleClass().add("buttonAggiorna");
@@ -136,6 +144,8 @@ public class ComunicaInSeriale extends Application {
 
 		// impostazioni
 
+		statoAntennaSet.getStyleClass().add("stato-antenna");
+		
 		Label eTitleSet = new Label("Settings");
 		Label ePortaCOM = new Label("Porta COM:");
 		Label eFeedbackSet = new Label("Feedback:");
@@ -152,7 +162,7 @@ public class ComunicaInSeriale extends Application {
 		grigliaImpostazioni.getStyleClass().add("griglia");
 
 		grigliaImpostazioni.add(eTitleSet, 0, 0);
-		//grigliaImpostazioni.add(temaScuro, 2, 0);
+		grigliaImpostazioni.add(statoAntennaSet, 1, 0, 2, 1);
 		grigliaImpostazioni.add(ePortaCOM, 0, 1, 2, 1);
 		grigliaImpostazioni.add(porteCOM, 2, 1);
 		grigliaImpostazioni.add(bCambiaPortaCOM, 0, 2);
@@ -186,8 +196,22 @@ public class ComunicaInSeriale extends Application {
 		temaChiaroScuro(false); 
 		// visualizziamo le porte Seriali disponibili
 		cercaPorteCOM();
+		
 	}
-
+	
+	//metodo che richiamo per fermare il ciclo del programma
+	public void pause(long pausa) {
+		boolean variableWait=true;
+		long tempo1=System.currentTimeMillis();
+		long tempo2;
+		while(variableWait) {
+			tempo2=System.currentTimeMillis();
+			if(tempo2-tempo1>pausa) {
+				variableWait=false;
+			}
+		}
+		
+	}
 	public void creaCombobox() {
 		modelli.getItems().add("modello1");
 		modelli.getItems().add("modello2");
@@ -209,17 +233,30 @@ public class ComunicaInSeriale extends Application {
 	public void startMovment(boolean registrato) {
 		System.out.println("start");
 		messageToSend[3]=1; //inizia movimento
+		inMovimento=true;
+		bStart.setDisable(true);
+		bStartReg.setDisable(true);
+		bStop.setDisable(false);
+		bStopReg.setDisable(false);
+		bAggiorna.setDisable(false);
+		bAggiornaReg.setDisable(false);
 		if(registrato) {
 			aggiornaDatiReg();
 		}else {
 			aggiornaDati();
 		}
-		
 	}
 
 	public void stopMovment(boolean registrato) {
 		System.out.println("stop");
 		messageToSend[3]=0; //ferma movimento
+		inMovimento=false;
+		bStart.setDisable(false);
+		bStartReg.setDisable(false);
+		bStop.setDisable(true);
+		bStopReg.setDisable(true);
+		bAggiorna.setDisable(true);
+		bAggiornaReg.setDisable(true);
 		if(registrato) {
 			aggiornaDatiReg();
 		}else {
@@ -289,29 +326,28 @@ public class ComunicaInSeriale extends Application {
 	
 	public boolean invia() {
 		boolean stato;
-		if(portaPresente) {
-			portaSeriale.writeBytes(messageToSend, 4);
-			byte[] acknowledgment= new byte[4];
+		if(portaPresente && portaSeriale.writeBytes(messageToSend, 4)!=-1) {
+			pause(1000);
+			System.out.println("acknowledgment: ");
 			long tempo1=System.currentTimeMillis();
 			long tempo2;
+			byte[] acknowledgment= new byte[10];
 			boolean continua=true;
-			while(portaSeriale.readBytes(acknowledgment, 4)!=4 && continua) {
+			while(portaSeriale.readBytes(acknowledgment, acknowledgment.length)!=acknowledgment.length && continua) {
 				//ti fermi qui fino a quando non hai ricevuto i caratteri dovuti
 				tempo2=System.currentTimeMillis();
-				if(tempo1-tempo2>100) {
+				if(tempo2-tempo1>100) {
 					continua=false;
 				}
 			}
 			for(int i=0; i<acknowledgment.length; i++) {
-				System.out.println(acknowledgment[i]); //se è 1 è stato ricevuto
+				System.out.println(acknowledgment[i]);
 			}
 			stato=true;
 		}else {
 			stato=false;
 		}
 		return stato;
-
-		
 	}
 	
 	public void cercaPorteCOM() {
@@ -321,23 +357,76 @@ public class ComunicaInSeriale extends Application {
 		}
 		porteCOM.getItems().clear();
 		nomePortaCOM = SerialPort.getCommPorts();
+		System.out.print("le porte trovate sono: ");
 		System.out.println(nomePortaCOM.length);
+		//aggiungiamo le porte l comboBox e selezioniamo la prima porta attiva
 		for (int i = 0; i < nomePortaCOM.length; i++) {
 			porteCOM.getItems().add(nomePortaCOM[i].getSystemPortName());
+			if (nomePortaCOM[i].openPort() && !portaPresente) {
+				portaPresente=true;
+				portaSeriale = nomePortaCOM[i];
+				porteCOM.getSelectionModel().select(i);
+				etichettaFeedbackSettings.setText("porta in uso: " + nomePortaCOM[i].getSystemPortName());
+				//controlliamo lo stato dell'antenna
+				pause(1500);
+				portaSeriale.writeBytes(startMessage, 1);//scrivi '5'
+				pause(250);
+				portaSeriale.readBytes(startMessage, 1);//memorizzi la risposta
+				//verfichiamo la risposta
+				System.out.println(startMessage[0]);
+				System.out.println("controllo antenna");
+				if(startMessage[0]==48) {
+					statoAntennaSet.getStyleClass().add("stato-antenna-inattivo");
+				}else if(startMessage[0]==49){
+					statoAntennaSet.getStyleClass().add("stato-antenna-attivo");
+				}else {
+					statoAntennaSet.getStyleClass().clear();
+					statoAntennaSet.getStyleClass().add("stato-antenna");
+				}
+				startMessage[0]='5';
+				System.out.println("... completato");
+			}
 		}
-		porteCOM.getSelectionModel().select(0);
-		cambiaCOM();
+		if(!portaPresente) {
+			etichettaFeedbackSettings.setText("!!! attenzione porte non accessibili");
+		}
 	}
 
 	public void cambiaCOM() {
 		String porta = porteCOM.getValue();
+		portaSeriale.closePort();
 		for (int i = 0; i < nomePortaCOM.length; i++) {
 			if (porta.equals(nomePortaCOM[i].getSystemPortName())) {
-				if (nomePortaCOM[i].openPort()) {
+				if (nomePortaCOM[i].openPort() && nomePortaCOM[i]!=portaSeriale) {
 					portaPresente=true;
 					etichettaFeedbackSettings.setText("porta in uso: " + porta);
-				} else {
-					etichettaFeedbackSettings.setText("impossibile aprire la porta");
+					portaSeriale = nomePortaCOM[i];
+					//controlliamo lo stato dell'antenna
+					pause(1500);
+					portaSeriale.writeBytes(startMessage, 1);//scrivi '5'
+					pause(250);
+					portaSeriale.readBytes(startMessage, 1);//memorizzi la risposta
+					//verfichiamo la risposta
+					System.out.println(startMessage[0]);
+					System.out.println("controllo antenna");
+					if(startMessage[0]==48) {
+						statoAntennaSet.getStyleClass().add("stato-antenna-inattivo");
+					}else if(startMessage[0]==49){
+						statoAntennaSet.getStyleClass().add("stato-antenna-attivo");
+					}else {
+						statoAntennaSet.getStyleClass().clear();
+						statoAntennaSet.getStyleClass().add("stato-antenna");
+					}
+					startMessage[0]='5';
+					System.out.println("... completato");
+					
+				}else if(nomePortaCOM[i]!=portaSeriale){
+					etichettaFeedbackSettings.setText("impossibile aprire la porta " + porta);
+					statoAntennaSet.getStyleClass().clear();
+					statoAntennaSet.getStyleClass().add("stato-antenna");
+				}else{
+					etichettaFeedbackSettings.setText("la porta " + porta+ " è già in uso");
+					
 				}
 				portaSeriale = nomePortaCOM[i];
 				i = nomePortaCOM.length - 1; //fermiamo il ciclo
