@@ -1,0 +1,48 @@
+
+.button{
+	-fx-border-color: rgb(200, 200, 200);
+	-fx-background-radius: 25;
+	-fx-padding: 5px;
+	-fx-border-radius: 23;
+	-fx-min-width: 100px;
+}
+.button:hover{
+	-fx-border-color: black;
+}
+.infoTitle{
+	-fx-font-size: 25;
+	-fx-text-alignment:center;
+	-fx-label-padding: 20 10 20 10;
+}
+.infoBackground{
+	-fx-background-color: rgb(255, 242, 230);
+	-fx-background-radius: 25;
+	-fx-border-radius: 25;
+	-fx-border-color: rgb(225, 212, 200);
+	-fx-border-width: 2;
+	-fx-alignment: center;
+}
+.slider{
+	-fx-min-width: 250px;
+}
+.label{
+	-fx-font-size: 15px;
+}
+.labelValues{
+	-fx-font-size: 12;
+	-fx-min-width: 50px;
+}
+.actualStatus{
+	-fx-padding: 10px;
+	-fx-max-height: 125px;
+	-fx-border-color: grey;
+	-fx-border-radius: 25px;
+	-fx-border-insets: 10px;
+}
+.gridPane{
+	-fx-hgap: 5px;
+	-fx-vgap: 10px;
+	-fx-padding: 10px;
+	-fx-alignment: top-center;
+/* 	-fx-grid-lines-visible:true; */
+}

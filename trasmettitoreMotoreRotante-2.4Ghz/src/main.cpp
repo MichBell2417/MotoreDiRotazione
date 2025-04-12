@@ -100,7 +100,7 @@ void loop() {
   //ci assicuriamo che siano stati ricevuti tutti i caratteri almeno 6
   if(length>6 && millis()-tempo1>50){
     if(!statoSerial.equals("")){
-      int statoToSend[3]; //all'indice 0 mettiamo lo stato della rotazione, all'indice 1 la velocità e all'indice 2 i step
+      int stateToSend[3]; //all'indice 0 mettiamo lo stato della rotazione, all'indice 1 la velocità e all'indice 2 i step
       int index=0; //variabile per controllare che valore stiamo leggendo
       String strNum; //variabile temporanea per contenere i valori del messaggio
       for(int i=0; i<length; i++){
@@ -116,13 +116,14 @@ void loop() {
           if(index==1 && strNum.toInt()<1){
             strNum="1";
           }
-          statoToSend[index]=strNum.toInt();
+          //salviamo il valore letto nello stateToSend
+          stateToSend[index]=strNum.toInt();
           strNum="";
           index++; //cambiamo l'indice per il prossimo valore
         }
       }
       //strutturato il messaggio lo inviamo al motore
-      if(!radio.write(&statoToSend, sizeof(statoToSend))){
+      if(!radio.write(&stateToSend, sizeof(stateToSend))){
         Serial.print("E5"); //comunichiamo che il motore non è stato raggiunto
       }
       statoSerial=""; //resettiamo il messaggio letto

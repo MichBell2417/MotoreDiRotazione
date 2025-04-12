@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>faretto.testaRotante</groupId>
-    <artifactId>interfacciaWireless</artifactId>
-    <version>1.0.0</version>
+    <groupId>motoreDiRotazione.software</groupId>
+    <artifactId>interfacciaGrafica</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
@@ -13,12 +13,12 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>17.0.12</version>
+            <version>21</version>
         </dependency>
-        <dependency>
+       	<dependency>
 		   <groupId>com.fazecast</groupId>
 		   <artifactId>jSerialComm</artifactId>
-		   <version>2.11.0</version>
+		   <version>[2.0.0,3.0.0)</version>
 		</dependency>
     </dependencies>
     <build>
@@ -26,24 +26,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.10.1</version>
                 <configuration>
                     <release>11</release>
                 </configuration>
             </plugin>
-            <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.6.0</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -54,7 +41,7 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>faretto.testaRotante.interfacciaWireless.ComunicaInSeriale</mainClass>
+                            <mainClass>motoreDiRotazione.software.interfacciaGrafica.App</mainClass>
                         </configuration>
                     </execution>
                 </executions>
