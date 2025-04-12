@@ -2,7 +2,7 @@
 Repository con codici riguardanti la creazioni di un sistema che, attraverso un computer, al quale c'è collegato un'[antenna](https://github.com/MichBell2417/meccanismo-Di-Rotazione/blob/main/SchemiElettrici/Antenna.pdf), riesce a comunicare attraverso un'interfaccia grafica apposita, con un [dispositivo](https://github.com/MichBell2417/meccanismo-Di-Rotazione/blob/main/SchemiElettrici/MotoreWirless.pdf) che attraverso un motore stepper, muove un faretto orizzontalmente.
 ## CARATTERISTICHE:
 #### antenna:
-l'antenna è un semplice arduino nano munito di un'trasmettitore RF24 che attraverso un codice ("TrasmettitoreTestaRotanteRF24") recepisce i valori dalla Seriale e li invia al "motore".
+l'antenna è un semplice arduino nano munito di un'trasmettitore RF24 che attraverso un codice ("[trasmettitoreMotoreRotante-2.4Ghz](trasmettitoreMotoreRotante-2.4Ghz/src)") recepisce i valori dalla Seriale e li invia al "motore".
 #### motore: 
 Il motore è un'altro dispositivo, ha il compito di ricevere i messaggi decodificarli capendo i comandi da eseguire ed eseguire i comandi ricevuti come la velocità di rotazione, i gradi di rotazione e quando girare o non.
 #### interfaccia grafica:
@@ -10,6 +10,6 @@ avendo reputato scomodo per un qualsiasi utilizzatore scrivere i comandi sulla p
 
 **esempio del comando da terminale:** 
 ```
-*path*\jdk-17.0.9-full\bin\java -cp target/interfacciaWireless-1.0.0.jar faretto.testaRotante.interfacciaWireless.ComunicaInSeriale
+*path*\jdk-21.0.5-full\bin\java -jar target/ControllerFaretto.jar
 ```
-Dove `*path*` è il percorso nel quale si trova il JDK: `jdk-17.0.9-full`. Il comando deve essere eseguito all'interno del percorso `.../InterfacciaGrafica`, [qui](https://github.com/MichBell2417/meccanismo-Di-Rotazione/tree/main/InterfacciaGrafica).
+Dove `*path*` è il percorso nel quale si trova il JDK: `jdk-21.0.5-full`. Il comando deve essere eseguito all'interno del percorso `.../InterfacciaGrafica`, [qui](https://github.com/MichBell2417/MotoreDiRotazione/tree/main/InterfacciaGrafica).
