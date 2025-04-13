@@ -7,7 +7,7 @@ l'antenna è un semplice arduino nano munito di un'trasmettitore RF24 che attrav
 Il motore è un'altro dispositivo, ha il compito di ricevere i messaggi decodificarli capendo i comandi da eseguire ed eseguire i comandi ricevuti come la velocità di rotazione, i gradi di rotazione e quando girare o non.
 #### interfaccia grafica:
 avendo reputato scomodo per un qualsiasi utilizzatore scrivere i comandi sulla porta seriale dall'IDE di arduino, ho deciso di programmare un'interfaccia grafica. Questa è programmata in Java ed utilizza la libreria jSerialComm (ver. 2.11.0) per comunicare con l'antenna collegata alla porta USB. Il progetto dell'interfaccia è stato organizzato con maven e può essere eseguito attraverso terminale utilizzando un full-JDK in grado di eseguire anche javaFX.
-
+Il file che contiene le configurazioni si trova nella cartella `*.confRotationMotor*` posizionata nella cartella dell'utente.
 **esempio del comando da terminale:** 
 ```
 *path*\jdk-21.0.5-full\bin\java -jar target/ControllerFaretto.jar
