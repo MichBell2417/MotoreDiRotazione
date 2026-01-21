@@ -12,4 +12,4 @@ Il file che contiene le configurazioni si trova nella cartella `*.confRotationMo
 ```
 *path*\jdk-21.0.5-full\bin\java -jar target/ControllerFaretto.jar
 ```
-Dove `*path*` è il percorso nel quale si trova il JDK: `jdk-21.0.5-full`. Il comando deve essere eseguito all'interno del percorso `.../InterfacciaGrafica`, [qui](https://github.com/MichBell2417/MotoreDiRotazione/tree/main/InterfacciaGrafica).
+Dove `*path*` è il percorso nel quale si trova il JDK: `jdk-21.0.5-full` o successivi. Il comando deve essere eseguito all'interno del percorso `.../InterfacciaGrafica`, [qui](https://github.com/MichBell2417/MotoreDiRotazione/tree/main/InterfacciaGrafica).
